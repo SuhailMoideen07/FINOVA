@@ -17,7 +17,7 @@ const Header = () => {
             className="h-12 w-auto object-contain"/>
           
         </Link>
-      
+      <div>
       <SignedOut>
         <SignInButton forceRedirectUrl="/dashboard">
           <Button variant="outline">Login</Button>
@@ -27,6 +27,7 @@ const Header = () => {
       <SignedIn>
         <UserButton />
       </SignedIn>
+      </div>
     </nav>
     </div>
   );
