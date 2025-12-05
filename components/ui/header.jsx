@@ -1,10 +1,24 @@
+"use client";
 
-const header = () => {
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import Image from "next/image";
+const Header = () => {
   return (
-    <div>
-     
-    </div>
-  )
-}
+    <div className="fixed top-0">
+      <nav>
+        <Link href="/">
+        <Image/>
+        </Link>
+      </nav>
+      <SignedOut>
+        <SignInButton />
+      </SignedOut>
 
-export default header
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
+    </div>
+  );
+};
+
+export default Header;
