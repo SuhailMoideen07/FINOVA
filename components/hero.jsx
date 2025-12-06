@@ -11,16 +11,16 @@ const HeroSection = () => {
         const imageElement = imageRef.current;
         const handleScroll = () => {
             const scrollPosition = window.scrollY;
-            const scrollThreshold = 100; 
-            if(scrollPosition > scrollThreshold){
+            const scrollThreshold = 100;
+            if (scrollPosition > scrollThreshold) {
                 imageElement.classList.add("scrolled");
-        } else{
-            imageElement.classList.remove("scrolled");
-        }
-    };
-        window.addEventListener("scroll",handleScroll)
+            } else {
+                imageElement.classList.remove("scrolled");
+            }
+        };
+        window.addEventListener("scroll", handleScroll)
         return () => {
-            window.removeEventListener("scroll",handleScroll);
+            window.removeEventListener("scroll", handleScroll);
         }
     }, []);
     return (
@@ -38,11 +38,17 @@ const HeroSection = () => {
                             Get Started
                         </Button>
                     </Link>
-                    <Link href="/dashboard">
+                    <button
+                        onClick={() => {
+                            const el = document.getElementById("features");
+                            if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }}
+                    >
                         <Button size="lg" variant="outline" className="px-8">
                             Learn More
                         </Button>
-                    </Link>
+                    </button>
+
                 </div>
                 <div className="hero-image-wrapper">
                     <div ref={imageRef} className="hero-image">
