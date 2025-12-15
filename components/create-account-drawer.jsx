@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from './ui/input'
 import { accountSchema } from '@/app/lib/schema'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 const CreateAccountDrawer = ({ children }) => {
   const [open, setOpen] = useState(false)
   const { register,
@@ -51,7 +52,8 @@ const CreateAccountDrawer = ({ children }) => {
             </div>
             <div className='space-y-2'>
               <label htmlFor="type" className='text-sm font-medium'>Account Type</label>
-              <Select onValueChange={(value) => setValue('type', value)}>
+              <Select onValueChange={(value) => setValue('type', value)}
+                defaultValue={watch('type')}>
                 <SelectTrigger id="type">
                   <SelectValue placeholder="Theme" />
                 </SelectTrigger>
@@ -60,7 +62,7 @@ const CreateAccountDrawer = ({ children }) => {
                   <SelectItem value="SAVINGS">Savings</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.name && (<p className='text-sm text-red-500'>{errors.name.message}</p>)}
+              {errors.type && (<p className='text-sm text-red-500'>{errors.type.message}</p>)}
             </div>
           </form>
         </div>
