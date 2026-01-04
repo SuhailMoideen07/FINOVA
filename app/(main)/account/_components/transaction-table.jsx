@@ -1,7 +1,8 @@
 "use client"
 
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -14,7 +15,12 @@ import {
 } from '@/components/ui/table'
 
 import { categoryColors } from '@/data/categories'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import {
   ChevronDown,
@@ -36,7 +42,16 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import useFetch from '@/hooks/use-fetch'
+import { bulkDeleteTransactions } from '@/actions/accounts'
+import { BarLoader } from 'react-spinners'
 
 const RECURRING_INTERVALS = {
   DAILY: 'Daily',
@@ -56,10 +71,15 @@ const TransactionTable = ({ transactions }) => {
   const [typeFilter, setTypeFilter] = useState("")
   const [recurringFilter, setRecurringFilter] = useState("")
 
+  const {
+    loading: deleteLoading,
+    fn: deleteFn,
+    data: deleted,
+  } = useFetch(bulkDeleteTransactions)
+
   const filteredAndSortedTransactions = useMemo(() => {
     let result = [...transactions]
 
-    // Search filter (FIXED)
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase()
       result = result.filter((transaction) =>
@@ -67,7 +87,6 @@ const TransactionTable = ({ transactions }) => {
       )
     }
 
-    // Recurring filter
     if (recurringFilter) {
       result = result.filter((transaction) => {
         if (recurringFilter === "recurring") return transaction.isRecurring
@@ -75,14 +94,12 @@ const TransactionTable = ({ transactions }) => {
       })
     }
 
-    // Type filter
     if (typeFilter) {
       result = result.filter(
         (transaction) => transaction.type === typeFilter
       )
     }
 
-    // Sorting (AMOUNT FIX ADDED)
     result.sort((a, b) => {
       let comparison = 0
       switch (sortConfig.field) {
@@ -122,7 +139,6 @@ const TransactionTable = ({ transactions }) => {
     )
   }
 
-  // SELECT ALL FIX
   const handleSelectAll = () => {
     setSelectedIds((current) =>
       current.length === filteredAndSortedTransactions.length
@@ -131,7 +147,22 @@ const TransactionTable = ({ transactions }) => {
     )
   }
 
-  const handleBulkDelete = () => {}
+  const handleBulkDelete = async () => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete ${selectedIds.length} transactions? This action cannot be undone.`
+      )
+    ) {
+      return
+    }
+    deleteFn(selectedIds)
+  }
+
+  useEffect(() => {
+    if (deleted && !deleteLoading) {
+      toast.error("Transactions deleted successfully!")
+    }
+  }, [deleted, deleteLoading])
 
   const handleClearFilters = () => {
     setSearchTerm("")
@@ -142,6 +173,10 @@ const TransactionTable = ({ transactions }) => {
 
   return (
     <div className="space-y-4">
+      {deleteLoading && (
+        <BarLoader className='mt-4' width={"100%"} color="#9333ea" />
+      )}
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -202,7 +237,6 @@ const TransactionTable = ({ transactions }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              {/* HEADER CHECKBOX FIX */}
               <TableHead className="w-[50px]">
                 <Checkbox
                   checked={
@@ -311,25 +345,30 @@ const TransactionTable = ({ transactions }) => {
 
                   <TableCell>
                     {transaction.isRecurring ? (
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Badge
-                            variant="outline"
-                            className="gap-1 bg-purple-100 text-purple-700 hover:bg-purple-200"
-                          >
-                            <RefreshCw className="h-3 w-3" />
-                            {RECURRING_INTERVALS[transaction.recurringInterval]}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className="text-sm">
-                            <div className="font-medium">Next Date:</div>
-                            <div>
-                              {format(new Date(transaction.nextRecurringDate), 'PP')}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Badge
+                              variant="outline"
+                              className="gap-1 bg-purple-100 text-purple-700 hover:bg-purple-200"
+                            >
+                              <RefreshCw className="h-3 w-3" />
+                              {RECURRING_INTERVALS[transaction.recurringInterval]}
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className="text-sm">
+                              <div className="font-medium">Next Date:</div>
+                              <div>
+                                {format(
+                                  new Date(transaction.nextRecurringDate),
+                                  'PP'
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     ) : (
                       <Badge variant="outline" className="gap-1">
                         <Clock className="h-3 w-3" />
@@ -354,7 +393,10 @@ const TransactionTable = ({ transactions }) => {
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => deleteFn([transaction.id])}
+                        >
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
