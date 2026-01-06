@@ -30,7 +30,9 @@ import {
   RefreshCw,
   Search,
   Trash,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -53,6 +55,8 @@ import useFetch from '@/hooks/use-fetch'
 import { bulkDeleteTransactions } from '@/actions/accounts'
 import { BarLoader } from 'react-spinners'
 
+const ITEMS_PER_PAGE = 10
+
 const RECURRING_INTERVALS = {
   DAILY: 'Daily',
   WEEKLY: 'Weekly',
@@ -63,6 +67,7 @@ const RECURRING_INTERVALS = {
 const TransactionTable = ({ transactions }) => {
   const router = useRouter()
   const [selectedIds, setSelectedIds] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
   const [sortConfig, setSortConfig] = useState({
     field: "date",
     direction: "desc",
@@ -121,6 +126,18 @@ const TransactionTable = ({ transactions }) => {
     return result
   }, [transactions, searchTerm, typeFilter, recurringFilter, sortConfig])
 
+  const totalPages = Math.ceil(
+    filteredAndSortedTransactions.length / ITEMS_PER_PAGE
+  )
+
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+    return filteredAndSortedTransactions.slice(
+      startIndex,
+      startIndex + ITEMS_PER_PAGE
+    )
+  }, [filteredAndSortedTransactions, currentPage])
+
   const handleSort = (field) => {
     setSortConfig((current) => ({
       field,
@@ -141,9 +158,9 @@ const TransactionTable = ({ transactions }) => {
 
   const handleSelectAll = () => {
     setSelectedIds((current) =>
-      current.length === filteredAndSortedTransactions.length
+      current.length === paginatedTransactions.length
         ? []
-        : filteredAndSortedTransactions.map((t) => t.id)
+        : paginatedTransactions.map((t) => t.id)
     )
   }
 
@@ -152,23 +169,28 @@ const TransactionTable = ({ transactions }) => {
       !window.confirm(
         `Are you sure you want to delete ${selectedIds.length} transactions? This action cannot be undone.`
       )
-    ) {
-      return
+    ) return
+
+    const res = await deleteFn(selectedIds)
+
+    if (res?.success) {
+      setSelectedIds([])
+      router.refresh()
     }
-    deleteFn(selectedIds)
   }
 
   useEffect(() => {
-    if (deleted && !deleteLoading) {
-      toast.error("Transactions deleted successfully!")
+    if (deleted?.success) {
+      toast.success("Transactions deleted successfully!")
     }
-  }, [deleted, deleteLoading])
+  }, [deleted])
 
   const handleClearFilters = () => {
     setSearchTerm("")
     setTypeFilter("")
     setRecurringFilter("")
     setSelectedIds([])
+    setCurrentPage(1)
   }
 
   return (
@@ -184,13 +206,16 @@ const TransactionTable = ({ transactions }) => {
           <Input
             placeholder="Search transactions..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value)
+              setCurrentPage(1)
+            }}
             className="pl-8"
           />
         </div>
 
         <div className="flex gap-2">
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setCurrentPage(1) }}>
             <SelectTrigger>
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
@@ -200,7 +225,7 @@ const TransactionTable = ({ transactions }) => {
             </SelectContent>
           </Select>
 
-          <Select value={recurringFilter} onValueChange={setRecurringFilter}>
+          <Select value={recurringFilter} onValueChange={(v) => { setRecurringFilter(v); setCurrentPage(1) }}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="All Transaction" />
             </SelectTrigger>
@@ -211,21 +236,14 @@ const TransactionTable = ({ transactions }) => {
           </Select>
 
           {selectedIds.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
-                <Trash className="h-4 w-4 mr-2" />
-                Delete Selected ({selectedIds.length})
-              </Button>
-            </div>
+            <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+              <Trash className="h-4 w-4 mr-2" />
+              Delete Selected ({selectedIds.length})
+            </Button>
           )}
 
           {(searchTerm || typeFilter || recurringFilter) && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleClearFilters}
-              title="Clear filters"
-            >
+            <Button variant="outline" size="icon" onClick={handleClearFilters}>
               <X className="h-4 w-5" />
             </Button>
           )}
@@ -240,8 +258,8 @@ const TransactionTable = ({ transactions }) => {
               <TableHead className="w-[50px]">
                 <Checkbox
                   checked={
-                    selectedIds.length === filteredAndSortedTransactions.length &&
-                    filteredAndSortedTransactions.length > 0
+                    selectedIds.length === paginatedTransactions.length &&
+                    paginatedTransactions.length > 0
                   }
                   onCheckedChange={handleSelectAll}
                 />
@@ -305,14 +323,14 @@ const TransactionTable = ({ transactions }) => {
           </TableHeader>
 
           <TableBody>
-            {filteredAndSortedTransactions.length === 0 ? (
+            {paginatedTransactions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground">
                   No transactions found.
                 </TableCell>
               </TableRow>
             ) : (
-              filteredAndSortedTransactions.map((transaction) => (
+              paginatedTransactions.map((transaction) => (
                 <TableRow key={transaction.id}>
                   <TableCell>
                     <Checkbox
@@ -395,7 +413,13 @@ const TransactionTable = ({ transactions }) => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive"
-                          onClick={() => deleteFn([transaction.id])}
+                          onClick={async () => {
+                            const res = await deleteFn([transaction.id])
+                            if (res?.success) {
+                              setSelectedIds([])
+                              router.refresh()
+                            }
+                          }}
                         >
                           Delete
                         </DropdownMenuItem>
@@ -408,6 +432,39 @@ const TransactionTable = ({ transactions }) => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={currentPage === 1}
+            onClick={() => {
+              setCurrentPage((p) => p - 1)
+              setSelectedIds([])
+            }}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          <span className="text-sm">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={currentPage === totalPages}
+            onClick={() => {
+              setCurrentPage((p) => p + 1)
+              setSelectedIds([])
+            }}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

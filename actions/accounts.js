@@ -6,12 +6,8 @@ import { revalidatePath } from "next/cache";
 
 const serializeTransaction = (obj) => {
   const serialized = { ...obj };
-  if (obj.balance) {
-    serialized.balance = obj.balance.toNumber();
-  }
-  if (obj.amount) {
-    serialized.amount = obj.amount.toNumber();
-  }
+  if (obj?.balance) serialized.balance = obj.balance.toNumber();
+  if (obj?.amount) serialized.amount = obj.amount.toNumber();
   return serialized;
 };
 
@@ -74,6 +70,10 @@ export async function getAccountWithTransactions(accountId) {
 
 export async function bulkDeleteTransactions(transactionIDs) {
   try {
+    if (!transactionIDs || transactionIDs.length === 0) {
+      return { success: true };
+    }
+
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
@@ -89,7 +89,6 @@ export async function bulkDeleteTransactions(transactionIDs) {
       },
     });
 
-    // FIX: store reduce result + correct enum
     const accountBalanceChanges = transactions.reduce((acc, transaction) => {
       const change =
         transaction.type === "EXPENSE"
@@ -110,11 +109,12 @@ export async function bulkDeleteTransactions(transactionIDs) {
         },
       });
 
-      for (const [accountId, balanceChange] of Object.entries(
-        accountBalanceChanges
-      )) {
+      for (const [accountId, balanceChange] of Object.entries(accountBalanceChanges)) {
         await tx.account.update({
-          where: { id: accountId },
+          where: {
+            id: accountId,
+            userId: user.id, // ✅ IMPORTANT
+          },
           data: {
             balance: { increment: balanceChange },
           },
@@ -123,12 +123,10 @@ export async function bulkDeleteTransactions(transactionIDs) {
     });
 
     revalidatePath("/dashboard");
-    revalidatePath("/account/[id]");
+    revalidatePath("/account/[id]", "page"); // ✅ FIX
 
-    // FIX: return success so toast can trigger
     return { success: true };
   } catch (error) {
-    // FIX: correct failure response
     return { success: false, error: error.message };
   }
 }
