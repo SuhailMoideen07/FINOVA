@@ -413,22 +413,28 @@ export function TransactionTable({ transactions }) {
           <Button
             variant="outline"
             size="icon"
+            className="h-7 w-7"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3 w-3" />
           </Button>
-          <span className="text-sm">
+
+          <span className="text-xs text-muted-foreground">
             Page {currentPage} of {totalPages}
           </span>
+
           <Button
             variant="outline"
             size="icon"
+            className="h-7 w-7"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3" />
           </Button>
+
+
         </div>
       )}
     </div>
