@@ -23,7 +23,7 @@ export const transactionSchema = z
   .superRefine((data, ctx) => {
     if (data.isRecurring && !data.recurringInterval) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Recurring interval is required for recurring transactions",
         path: ["recurringInterval"],
       });
