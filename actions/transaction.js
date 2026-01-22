@@ -118,18 +118,21 @@ function calculateNextRecurringDate(startDate, interval) {
   return date;
 }
 
-// 🔍 Receipt Scanner
+// 🔍 Receipt Scanner - Updated for Groq API
 export async function scanReceipt(file) {
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error("GEMINI_API_KEY is not set");
+    if (!process.env.GROQ_API_KEY) {
+      throw new Error("GROQ_API_KEY is not set");
     }
 
+    // Convert file to base64
     const arrayBuffer = await file.arrayBuffer();
     const base64String = Buffer.from(arrayBuffer).toString("base64");
 
-    const prompt = `
-Analyze this receipt image and extract the following information in JSON format:
+    // Determine the mime type from the file
+    const mimeType = file.type || "image/jpeg";
+
+    const prompt = `Analyze this receipt image and extract the following information in JSON format:
 - Total amount (just the number)
 - Date (in ISO format)
 - Description or items purchased (brief summary)
@@ -145,47 +148,60 @@ Only respond with valid JSON in this exact format:
   "category": "string"
 }
 
-If its not a receipt, return an empty object
-`;
+If it's not a receipt, return an empty object {}`;
 
-   const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [
-            { text: prompt },
+    // Make request to Groq API
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
+          messages: [
             {
-              inline_data: {
-                mime_type: file.type,
-                data: base64String,
-              },
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: prompt,
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${mimeType};base64,${base64String}`,
+                  },
+                },
+              ],
             },
           ],
-        },
-      ],
-    }),
-  }
-);
-
+          temperature: 0.2,
+          max_completion_tokens: 1024,
+          response_format: { type: "json_object" },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("Gemini API Error:", errorData);
-      throw new Error(`Gemini API Error: ${response.statusText}`);
+      console.error("Groq API Error:", errorData);
+      throw new Error(`Groq API Error: ${response.statusText}`);
     }
 
     const result = await response.json();
-    const text = result.candidates[0].content.parts[0].text;
-    const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
+    const text = result.choices[0].message.content;
 
     try {
-      const data = JSON.parse(cleanedText);
+      const data = JSON.parse(text);
+      
+      // Return empty if not a valid receipt
+      if (!data.amount || Object.keys(data).length === 0) {
+        throw new Error("Not a valid receipt image");
+      }
+
       return {
         amount: parseFloat(data.amount),
         date: new Date(data.date),
@@ -196,11 +212,11 @@ If its not a receipt, return an empty object
     } catch (parseError) {
       console.error("Error parsing JSON response:", parseError);
       console.error("Raw response:", text);
-      throw new Error("Invalid response format from Gemini");
+      throw new Error("Invalid response format from Groq");
     }
   } catch (error) {
     console.error("Error scanning receipt:", error);
-    throw new Error("Failed to scan receipt");
+    throw new Error(error.message || "Failed to scan receipt");
   }
 }
 
@@ -222,70 +238,71 @@ export async function getTransaction(id) {
 
   return serializeAmount(transaction);
 }
+
 export async function updateTransaction(id, data) {
   try {
-      const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
-  const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
-  });
-  if (!user) throw new Error("User not found");
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+    if (!user) throw new Error("User not found");
 
-  //Get original transaction to calculate balance change
-  const originalTransaction = await db.transaction.findUnique({
-    where: {
-      id,
-      userId: user.id,
-    },
-  include: {
-      account: true,
-    },
-  });
-  
-    if(!originalTransaction) throw new Error("Transaction not found");
-  //Calculate balance change
-  const oldBalanceChange 
-    = originalTransaction.type === "EXPENSE"
-    ? -originalTransaction.amount.toNumber()
-    : originalTransaction.amount.toNumber();
-  const newBalanceChange 
-    = data.type === "EXPENSE"
-    ? -data.amount
-    : data.amount;
-  const netBalanceChange = newBalanceChange - oldBalanceChange;
-
-  //Update transaction and account balance in a transaction
-  const transaction = await db.$transaction(async (tx) => {
-    const updated = await tx.transaction.update({
+    // Get original transaction to calculate balance change
+    const originalTransaction = await db.transaction.findUnique({
       where: {
         id,
         userId: user.id,
       },
-      data: {
-        ...data,
-        nextRecurringDate:
-          data.isRecurring && data.recurringInterval
-            ? calculateNextRecurringDate(data.date, data.recurringInterval)
-            : null,
+      include: {
+        account: true,
       },
     });
-    //Update account balance
-    await tx.account.update({
-      where: { id: data.accountId },
-      data: { balance: { 
-        increment: netBalanceChange 
-      } },
-    });
-    return updated;
 
-  });
-  revalidatePath("/dashboard");
-  revalidatePath(`/account/${data.accountId}`);
-  return {
-    success: true,
-    data: serializeAmount(transaction),
-  };
-  
+    if (!originalTransaction) throw new Error("Transaction not found");
+
+    // Calculate balance change
+    const oldBalanceChange =
+      originalTransaction.type === "EXPENSE"
+        ? -originalTransaction.amount.toNumber()
+        : originalTransaction.amount.toNumber();
+    const newBalanceChange =
+      data.type === "EXPENSE" ? -data.amount : data.amount;
+    const netBalanceChange = newBalanceChange - oldBalanceChange;
+
+    // Update transaction and account balance in a transaction
+    const transaction = await db.$transaction(async (tx) => {
+      const updated = await tx.transaction.update({
+        where: {
+          id,
+          userId: user.id,
+        },
+        data: {
+          ...data,
+          nextRecurringDate:
+            data.isRecurring && data.recurringInterval
+              ? calculateNextRecurringDate(data.date, data.recurringInterval)
+              : null,
+        },
+      });
+      // Update account balance
+      await tx.account.update({
+        where: { id: data.accountId },
+        data: {
+          balance: {
+            increment: netBalanceChange,
+          },
+        },
+      });
+      return updated;
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/account/${data.accountId}`);
+    return {
+      success: true,
+      data: serializeAmount(transaction),
+    };
   } catch (error) {
     throw new Error(error.message);
   }

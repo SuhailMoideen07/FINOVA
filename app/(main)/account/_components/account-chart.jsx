@@ -11,7 +11,15 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { format, subDays, startOfDay, endOfDay } from "date-fns";
+import {
+  format,
+  subDays,
+  startOfDay,
+  endOfDay,
+  startOfMonth,
+  endOfMonth,
+  subMonths,
+} from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -23,7 +31,7 @@ import {
 
 const DATE_RANGES = {
   "7D": { label: "Last 7 Days", days: 7 },
-  "1M": { label: "Last Month", days: 30 },
+  "1M": { label: "Last Month", days: 30 }, // label stays same
   "3M": { label: "Last 3 Months", days: 90 },
   "6M": { label: "Last 6 Months", days: 180 },
   ALL: { label: "All Time", days: null },
@@ -33,38 +41,54 @@ export function AccountChart({ transactions }) {
   const [dateRange, setDateRange] = useState("1M");
 
   const filteredData = useMemo(() => {
-    const range = DATE_RANGES[dateRange];
     const now = new Date();
-    const startDate = range.days
-      ? startOfDay(subDays(now, range.days))
-      : startOfDay(new Date(0));
 
-    // Filter transactions within date range
+    let startDate;
+    let endDate = endOfDay(now);
+
+    if (dateRange === "1M") {
+      // Previous full calendar month
+      const lastMonth = subMonths(now, 1);
+      startDate = startOfMonth(lastMonth);
+      endDate = endOfMonth(lastMonth);
+    } else {
+      const range = DATE_RANGES[dateRange];
+      startDate = range.days
+        ? startOfDay(subDays(now, range.days))
+        : startOfDay(new Date(0));
+    }
+
     const filtered = transactions.filter(
-      (t) => new Date(t.date) >= startDate && new Date(t.date) <= endOfDay(now)
+      (t) =>
+        new Date(t.date) >= startDate && new Date(t.date) <= endDate
     );
 
-    // Group transactions by date
     const grouped = filtered.reduce((acc, transaction) => {
-      const date = format(new Date(transaction.date), "MMM dd");
-      if (!acc[date]) {
-        acc[date] = { date, income: 0, expense: 0 };
+      const rawDate = startOfDay(new Date(transaction.date)).toISOString();
+
+      if (!acc[rawDate]) {
+        acc[rawDate] = {
+          rawDate,
+          date: format(new Date(transaction.date), "MMM dd"),
+          income: 0,
+          expense: 0,
+        };
       }
+
       if (transaction.type === "INCOME") {
-        acc[date].income += transaction.amount;
+        acc[rawDate].income += transaction.amount;
       } else {
-        acc[date].expense += transaction.amount;
+        acc[rawDate].expense += transaction.amount;
       }
+
       return acc;
     }, {});
 
-    // Convert to array and sort by date
     return Object.values(grouped).sort(
-      (a, b) => new Date(a.date) - new Date(b.date)
+      (a, b) => new Date(a.rawDate) - new Date(b.rawDate)
     );
   }, [transactions, dateRange]);
 
-  // Calculate totals for the selected period
   const totals = useMemo(() => {
     return filteredData.reduce(
       (acc, day) => ({
@@ -94,6 +118,7 @@ export function AccountChart({ transactions }) {
           </SelectContent>
         </Select>
       </CardHeader>
+
       <CardContent>
         <div className="flex justify-around mb-6 text-sm">
           <div className="text-center">
@@ -121,6 +146,7 @@ export function AccountChart({ transactions }) {
             </p>
           </div>
         </div>
+
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -128,12 +154,7 @@ export function AccountChart({ transactions }) {
               margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis
-                dataKey="date"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
+              <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis
                 fontSize={12}
                 tickLine={false}
@@ -149,18 +170,8 @@ export function AccountChart({ transactions }) {
                 }}
               />
               <Legend />
-              <Bar
-                dataKey="income"
-                name="Income"
-                fill="#22c55e"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                dataKey="expense"
-                name="Expense"
-                fill="#ef4444"
-                radius={[4, 4, 0, 0]}
-              />
+              <Bar dataKey="income" name="Income" fill="#22c55e" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expense" name="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -15,9 +15,91 @@ export default function EmailTemplate({
   type = "budget-alert",
   data = {},
 }) {
-  if (type === "monthly-alert") {
-    // TODO: Add monthly alert template
-    return null;
+  if (type === "monthly-report") {
+    const netAmount = data?.stats.totalIncome - data?.stats.totalExpenses;
+    const isPositive = netAmount >= 0;
+
+    return (
+      <Html>
+        <Head />
+        <Preview>Your Monthly Financial Report</Preview>
+        <Body style={styles.body}>
+          <Container style={styles.container}>
+            {/* Header */}
+            <Section style={styles.header}>
+              <Heading style={styles.heading}>Monthly Financial Report</Heading>
+            </Section>
+
+            {/* Main Content */}
+            <Section style={styles.content}>
+              <Text style={styles.greeting}>Hello {userName},</Text>
+              <Text style={styles.mainText}>
+                Here&rsquo;s your financial summary for {data?.month}:
+              </Text>
+
+              {/* Main Stats Grid */}
+              <Section style={styles.statsGrid}>
+                <div style={styles.statCard}>
+                  <Text style={styles.statLabel}>Total Income</Text>
+                  <Text style={{ ...styles.statValue, color: "#10b981" }}>
+                    ${data?.stats.totalIncome?.toLocaleString()}
+                  </Text>
+                </div>
+                <div style={styles.statCard}>
+                  <Text style={styles.statLabel}>Total Expenses</Text>
+                  <Text style={{ ...styles.statValue, color: "#ef4444" }}>
+                    ${data?.stats.totalExpenses?.toLocaleString()}
+                  </Text>
+                </div>
+                <div style={styles.statCard}>
+                  <Text style={styles.statLabel}>Net</Text>
+                  <Text style={{ 
+                    ...styles.statValue, 
+                    color: isPositive ? "#10b981" : "#ef4444" 
+                  }}>
+                    ${netAmount?.toLocaleString()}
+                  </Text>
+                </div>
+              </Section>
+
+              {/* Category Breakdown */}
+              {data?.stats?.byCategory && (
+                <Section style={styles.categorySection}>
+                  <Text style={styles.sectionTitle}>Expenses by Category</Text>
+                  {Object.entries(data?.stats.byCategory).map(
+                    ([category, amount]) => (
+                      <div key={category} style={styles.categoryRow}>
+                        <Text style={styles.categoryLabel}>{category}</Text>
+                        <Text style={styles.categoryAmount}>${amount?.toLocaleString()}</Text>
+                      </div>
+                    )
+                  )}
+                </Section>
+              )}
+
+              {/* AI Insights */}
+              {data?.insights && data.insights.length > 0 && (
+                <Section style={styles.insightsSection}>
+                  <Text style={styles.sectionTitle}>FINOVA Insights</Text>
+                  {data.insights.map((insight, index) => (
+                    <Text key={index} style={styles.insightText}>
+                      • {insight}
+                    </Text>
+                  ))}
+                </Section>
+              )}
+            </Section>
+
+            {/* Footer */}
+            <Section style={styles.footer}>
+              <Text style={styles.footerText}>
+                Track your finances intelligently with FINOVA
+              </Text>
+            </Section>
+          </Container>
+        </Body>
+      </Html>
+    );
   }
 
   if (type === "budget-alert") {
@@ -194,5 +276,48 @@ const styles = {
     color: "#6b7280",
     fontSize: "14px",
     margin: "0",
+  },
+  categorySection: {
+    backgroundColor: "#f9fafb",
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    padding: "20px",
+    margin: "0 0 24px",
+  },
+  sectionTitle: {
+    color: "#1f2937",
+    fontSize: "18px",
+    fontWeight: "600",
+    margin: "0 0 16px",
+  },
+  categoryRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "12px 0",
+    borderBottom: "1px solid #e5e7eb",
+  },
+  categoryLabel: {
+    color: "#4b5563",
+    fontSize: "15px",
+    margin: "0",
+  },
+  categoryAmount: {
+    color: "#1f2937",
+    fontSize: "15px",
+    fontWeight: "600",
+    margin: "0",
+  },
+  insightsSection: {
+    backgroundColor: "#eff6ff",
+    border: "1px solid #bfdbfe",
+    borderRadius: "12px",
+    padding: "20px",
+    margin: "0 0 24px",
+  },
+  insightText: {
+    color: "#1e40af",
+    fontSize: "14px",
+    lineHeight: "20px",
+    margin: "0 0 8px",
   },
 };
