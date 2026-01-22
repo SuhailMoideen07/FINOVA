@@ -29,16 +29,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Order changed: "Last 7 Days" comes first, but default remains "This Month"
 const DATE_RANGES = {
   "7D": { label: "Last 7 Days", days: 7 },
-  "1M": { label: "Last Month", days: 30 }, // label stays same
+  TM: { label: "This Month" },
+  "1M": { label: "Last Month" },
   "3M": { label: "Last 3 Months", days: 90 },
   "6M": { label: "Last 6 Months", days: 180 },
   ALL: { label: "All Time", days: null },
 };
 
 export function AccountChart({ transactions }) {
-  const [dateRange, setDateRange] = useState("1M");
+  const [dateRange, setDateRange] = useState("TM"); // Default = This Month
 
   const filteredData = useMemo(() => {
     const now = new Date();
@@ -46,7 +48,11 @@ export function AccountChart({ transactions }) {
     let startDate;
     let endDate = endOfDay(now);
 
-    if (dateRange === "1M") {
+    if (dateRange === "TM") {
+      // Current calendar month (1st → today)
+      startDate = startOfMonth(now);
+      endDate = endOfDay(now);
+    } else if (dateRange === "1M") {
       // Previous full calendar month
       const lastMonth = subMonths(now, 1);
       startDate = startOfMonth(lastMonth);
@@ -59,8 +65,7 @@ export function AccountChart({ transactions }) {
     }
 
     const filtered = transactions.filter(
-      (t) =>
-        new Date(t.date) >= startDate && new Date(t.date) <= endDate
+      (t) => new Date(t.date) >= startDate && new Date(t.date) <= endDate
     );
 
     const grouped = filtered.reduce((acc, transaction) => {
@@ -105,8 +110,8 @@ export function AccountChart({ transactions }) {
         <CardTitle className="text-base font-normal">
           Transaction Overview
         </CardTitle>
-        <Select defaultValue={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-[140px]">
+        <Select value={dateRange} onValueChange={setDateRange}>
+          <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Select range" />
           </SelectTrigger>
           <SelectContent>
@@ -154,7 +159,12 @@ export function AccountChart({ transactions }) {
               margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
+              <XAxis
+                dataKey="date"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+              />
               <YAxis
                 fontSize={12}
                 tickLine={false}
@@ -170,8 +180,18 @@ export function AccountChart({ transactions }) {
                 }}
               />
               <Legend />
-              <Bar dataKey="income" name="Income" fill="#22c55e" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="expense" name="Expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="income"
+                name="Income"
+                fill="#22c55e"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="expense"
+                name="Expense"
+                fill="#ef4444"
+                radius={[4, 4, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
