@@ -9,6 +9,7 @@ import useFetch from "@/hooks/use-fetch";
 
 const ReceiptScanner = ({ onScanComplete }) => {
   const fileInputRef = useRef(null);
+  const hasProcessed = useRef(false);
 
   const {
     loading: scanReceiptLoading,
@@ -22,16 +23,17 @@ const ReceiptScanner = ({ onScanComplete }) => {
       return;
     }
 
+    hasProcessed.current = false; // reset for new scan
     await scanReceiptFn(file);
   };
 
-
   useEffect(() => {
-    if (scannedData && !scanReceiptLoading) {
+    if (scannedData && !hasProcessed.current) {
+      hasProcessed.current = true;
       onScanComplete(scannedData);
-      toast.success("Receipt scanned successfully");
     }
-  }, [scanReceiptLoading, scannedData]); 
+  }, [scannedData]); // <-- no onScanComplete here
+
   return (
     <div className="flex items-center gap-4">
       <input
@@ -47,21 +49,8 @@ const ReceiptScanner = ({ onScanComplete }) => {
       />
 
       <Button
-        type="button" 
-        className="
-          group
-          w-full h-10
-          bg-slate-900
-          text-white
-          font-medium
-          rounded-md
-          transition-all duration-200
-          hover:bg-slate-800
-          hover:-translate-y-[1px]
-          hover:shadow-sm
-          disabled:hover:translate-y-0
-          disabled:hover:shadow-none
-        "
+        type="button"
+        className="group w-full h-10 bg-slate-900 text-white rounded-md"
         onClick={() => fileInputRef.current?.click()}
         disabled={scanReceiptLoading}
       >
@@ -72,15 +61,7 @@ const ReceiptScanner = ({ onScanComplete }) => {
           </>
         ) : (
           <>
-            <Camera
-              className="
-                mr-2
-                text-teal-500
-                transition-all duration-200
-                group-hover:text-teal-400
-                group-hover:drop-shadow-[0_0_6px_rgba(20,184,166,0.6)]
-              "
-            />
+            <Camera className="mr-2 text-teal-500" />
             <span>Scan Receipt with AI</span>
           </>
         )}

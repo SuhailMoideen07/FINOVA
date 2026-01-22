@@ -5,6 +5,7 @@ import {
   CreditCard,
   Globe,
   Zap,
+  Repeat,
 } from "lucide-react";
 
 // Stats Data
@@ -52,9 +53,10 @@ export const featuresData = [
     description: "Manage multiple accounts and credit cards in one place",
   },
   {
-    icon: <Globe className="h-8 w-8 text-blue-600" />,
-    title: "Multi-Currency",
-    description: "Support for multiple currencies with real-time conversion",
+    icon: <Repeat className="h-8 w-8 text-blue-600" />,
+    title: "Recurring Transactions",
+    description:
+      "Automatically track bills, subscriptions, and EMIs without manual entry.",
   },
   {
     icon: <Zap className="h-8 w-8 text-blue-600" />,
@@ -106,6 +108,6 @@ export const testimonialsData = [
     role: "Financial Advisor",
     image: "https://randomuser.me/api/portraits/women/74.jpg",
     quote:
-      "I recommend Welth to all my clients. The multi-currency support and detailed analytics make it perfect for international investors.",
+      "I recommend Welth to all my clients. The automated tracking and detailed analytics make it perfect for modern money management.",
   },
 ];
