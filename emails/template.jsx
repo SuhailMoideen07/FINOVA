@@ -103,14 +103,19 @@ export default function EmailTemplate({
   }
 
   if (type === "budget-alert") {
-    const remaining = data?.budgetAmount - data?.totalExpenses;
-    const isWarning = data?.percentageUsed >= 75;
-    const isDanger = data?.percentageUsed >= 90;
+    // Parse the already-formatted strings back to numbers for calculations
+    const budgetAmount = parseFloat(data?.budgetAmount) || 0;
+    const totalExpenses = parseFloat(data?.totalExpenses) || 0;
+    const percentageUsed = parseFloat(data?.percentageUsed) || 0;
+    
+    const remaining = budgetAmount - totalExpenses;
+    const isWarning = percentageUsed >= 75;
+    const isDanger = percentageUsed >= 90;
 
     return (
       <Html>
         <Head />
-        <Preview>Budget Alert - {data?.percentageUsed.toFixed(1)}% Used</Preview>
+        <Preview>Budget Alert - {data?.percentageUsed}% Used</Preview>
         <Body style={styles.body}>
           <Container style={styles.container}>
             {/* Header */}
@@ -129,7 +134,7 @@ export default function EmailTemplate({
                     fontSize: "20px",
                   }}
                 >
-                  {data?.percentageUsed.toFixed(1)}%
+                  {data?.percentageUsed}%
                 </strong>{" "}
                 of your monthly budget.
               </Text>
@@ -139,19 +144,19 @@ export default function EmailTemplate({
                 <div style={styles.statCard}>
                   <Text style={styles.statLabel}>Budget Amount</Text>
                   <Text style={styles.statValue}>
-                    ${data?.budgetAmount.toLocaleString()}
+                    ${data?.budgetAmount}
                   </Text>
                 </div>
                 <div style={styles.statCard}>
                   <Text style={styles.statLabel}>Spent So Far</Text>
                   <Text style={{ ...styles.statValue, color: "#ef4444" }}>
-                    ${data?.totalExpenses.toLocaleString()}
+                    ${data?.totalExpenses}
                   </Text>
                 </div>
                 <div style={styles.statCard}>
                   <Text style={styles.statLabel}>Remaining</Text>
                   <Text style={{ ...styles.statValue, color: "#10b981" }}>
-                    ${remaining.toLocaleString()}
+                    ${remaining.toFixed(2)}
                   </Text>
                 </div>
               </Section>
@@ -161,8 +166,8 @@ export default function EmailTemplate({
                 <Section style={styles.warningBox}>
                   <Text style={styles.warningText}>
                     {isDanger
-                      ? `⚠️ You're at ${data?.percentageUsed.toFixed(1)}% of your budget. Consider reducing spending to avoid going over limit.`
-                      : `⚡ You're at ${data?.percentageUsed.toFixed(1)}% of your budget. Keep an eye on your expenses.`}
+                      ? `⚠️ You're at ${data?.percentageUsed}% of your budget. Consider reducing spending to avoid going over limit.`
+                      : `⚡ You're at ${data?.percentageUsed}% of your budget. Keep an eye on your expenses.`}
                   </Text>
                 </Section>
               )}
