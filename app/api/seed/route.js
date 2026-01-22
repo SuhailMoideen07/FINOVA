@@ -1,5 +1,5 @@
 import { seedTransactions } from "@/actions/seed";
-import { protectRoute } from "@/lib/arcjet";
+import { protectRoute } from "@/lib/arcjet"; 
 
 export async function GET(req) {
   // Add Arcjet protection
