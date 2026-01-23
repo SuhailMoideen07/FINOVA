@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -36,6 +36,16 @@ export function DashboardOverview({ accounts, transactions }) {
   const [selectedAccountId, setSelectedAccountId] = useState(
     accounts.find((a) => a.isDefault)?.id || accounts[0]?.id
   );
+
+  // 🔄 Sync with default account changes
+  useEffect(() => {
+    const newDefault =
+      accounts.find((a) => a.isDefault)?.id || accounts[0]?.id;
+
+    if (newDefault && newDefault !== selectedAccountId) {
+      setSelectedAccountId(newDefault);
+    }
+  }, [accounts, selectedAccountId]);
 
   // Filter transactions for selected account
   const accountTransactions = transactions.filter(
