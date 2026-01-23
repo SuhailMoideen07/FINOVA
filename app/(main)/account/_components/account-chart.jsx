@@ -29,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Order changed: "Last 7 Days" comes first, but default remains "This Month"
 const DATE_RANGES = {
   "7D": { label: "Last 7 Days", days: 7 },
   TM: { label: "This Month" },
@@ -40,7 +39,7 @@ const DATE_RANGES = {
 };
 
 export function AccountChart({ transactions }) {
-  const [dateRange, setDateRange] = useState("TM"); // Default = This Month
+  const [dateRange, setDateRange] = useState("TM");
 
   const filteredData = useMemo(() => {
     const now = new Date();
@@ -49,11 +48,9 @@ export function AccountChart({ transactions }) {
     let endDate = endOfDay(now);
 
     if (dateRange === "TM") {
-      // Current calendar month (1st → today)
       startDate = startOfMonth(now);
       endDate = endOfDay(now);
     } else if (dateRange === "1M") {
-      // Previous full calendar month
       const lastMonth = subMonths(now, 1);
       startDate = startOfMonth(lastMonth);
       endDate = endOfMonth(lastMonth);
@@ -129,13 +126,13 @@ export function AccountChart({ transactions }) {
           <div className="text-center">
             <p className="text-muted-foreground">Total Income</p>
             <p className="text-lg font-bold text-green-500">
-              ${totals.income.toFixed(2)}
+              ₹{totals.income.toFixed(2)}
             </p>
           </div>
           <div className="text-center">
             <p className="text-muted-foreground">Total Expenses</p>
             <p className="text-lg font-bold text-red-500">
-              ${totals.expense.toFixed(2)}
+              ₹{totals.expense.toFixed(2)}
             </p>
           </div>
           <div className="text-center">
@@ -147,7 +144,7 @@ export function AccountChart({ transactions }) {
                   : "text-red-500"
               }`}
             >
-              ${(totals.income - totals.expense).toFixed(2)}
+              ₹{(totals.income - totals.expense).toFixed(2)}
             </p>
           </div>
         </div>
@@ -169,10 +166,10 @@ export function AccountChart({ transactions }) {
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `$${value}`}
+                tickFormatter={(value) => `₹${value}`}
               />
               <Tooltip
-                formatter={(value) => [`$${value}`, undefined]}
+                formatter={(value) => [`₹${value}`, undefined]}
                 contentStyle={{
                   backgroundColor: "hsl(var(--popover))",
                   border: "1px solid hsl(var(--border))",

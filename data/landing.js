@@ -3,65 +3,69 @@ import {
   Receipt,
   PieChart,
   CreditCard,
-  Globe,
   Zap,
   Repeat,
+  Building2,
+  Truck,
 } from "lucide-react";
 
-// Stats Data
+// Stats Data (Company-focused)
 export const statsData = [
   {
-    value: "50K+",
-    label: "Active Users",
+    value: "120+",
+    label: "Projects Managed",
   },
   {
-    value: "$2B+",
-    label: "Transactions Tracked",
+    value: "₹45Cr+",
+    label: "Expenses Tracked",
   },
   {
     value: "99.9%",
-    label: "Uptime",
+    label: "System Reliability",
   },
   {
-    value: "4.9/5",
-    label: "User Rating",
+    value: "4.8/5",
+    label: "Client Satisfaction",
   },
 ];
 
-// Features Data
+// Features Data (Construction-Focused)
 export const featuresData = [
   {
     icon: <BarChart3 className="h-8 w-8 text-blue-600" />,
-    title: "Advanced Analytics",
+    title: "Project Analytics",
     description:
-      "Get detailed insights into your spending patterns with AI-powered analytics",
+      "Track every project’s income and expenses with clear, real-time insights.",
   },
   {
     icon: <Receipt className="h-8 w-8 text-blue-600" />,
-    title: "Smart Receipt Scanner",
+    title: "Smart Bill Scanner",
     description:
-      "Extract data automatically from receipts using advanced AI technology",
+      "Scan material bills and site receipts to auto-fill transactions instantly.",
   },
   {
-    icon: <PieChart className="h-8 w-8 text-blue-600" />,
-    title: "Budget Planning",
-    description: "Create and manage budgets with intelligent recommendations",
+    icon: <Building2 className="h-8 w-8 text-blue-600" />,
+    title: "Project-Based Accounts",
+    description:
+      "Maintain separate financial views for each site, client, or project.",
   },
   {
-    icon: <CreditCard className="h-8 w-8 text-blue-600" />,
-    title: "Multi-Account Support",
-    description: "Manage multiple accounts and credit cards in one place",
+    icon: <Truck className="h-8 w-8 text-blue-600" />,
+    title: "Material & Labour Tracking",
+    description:
+      "Monitor spending on cement, steel, labour wages, and machinery with ease.",
   },
   {
     icon: <Repeat className="h-8 w-8 text-blue-600" />,
-    title: "Recurring Transactions",
+    title: "Recurring Costs",
     description:
-      "Automatically track bills, subscriptions, and EMIs without manual entry.",
+      "Automatically handle rent, salaries, EMI payments, and maintenance charges.",
   },
   {
     icon: <Zap className="h-8 w-8 text-blue-600" />,
     title: "Automated Insights",
-    description: "Get automated financial insights and recommendations",
+    description:
+      "Get clear suggestions on cost control and project profitability.",
   },
 ];
 
@@ -69,45 +73,45 @@ export const featuresData = [
 export const howItWorksData = [
   {
     icon: <CreditCard className="h-8 w-8 text-blue-600" />,
-    title: "1. Create Your Account",
+    title: "1. Set Up Your Company",
     description:
-      "Get started in minutes with our simple and secure sign-up process",
+      "Create accounts for your office, projects, and operational expenses.",
   },
   {
-    icon: <BarChart3 className="h-8 w-8 text-blue-600" />,
-    title: "2. Track Your Spending",
+    icon: <Receipt className="h-8 w-8 text-blue-600" />,
+    title: "2. Record Every Transaction",
     description:
-      "Automatically categorize and track your transactions in real-time",
+      "Add expenses manually or scan bills directly from the construction site.",
   },
   {
     icon: <PieChart className="h-8 w-8 text-blue-600" />,
-    title: "3. Get Insights",
+    title: "3. Understand Your Growth",
     description:
-      "Receive AI-powered insights and recommendations to optimize your finances",
+      "View project-wise profit, cash flow, and spending patterns instantly.",
   },
 ];
 
-// Testimonials Data
+// Testimonials Data (Neutral, Professional Names)
 export const testimonialsData = [
   {
-    name: "Sarah Johnson",
-    role: "Small Business Owner",
-    image: "https://randomuser.me/api/portraits/women/75.jpg",
+    name: "Alex Morgan",
+    role: "Construction Contractor",
+    image: "https://randomuser.me/api/portraits/men/32.jpg",
     quote:
-      "Welth has transformed how I manage my business finances. The AI insights have helped me identify cost-saving opportunities I never knew existed.",
+      "Earlier I tracked everything in notebooks. Now I know exactly where every rupee goes on each site. This changed how I run my business.",
   },
   {
-    name: "Michael Chen",
-    role: "Freelancer",
-    image: "https://randomuser.me/api/portraits/men/75.jpg",
+    name: "Emma Clarke",
+    role: "Project Manager",
+    image: "https://randomuser.me/api/portraits/women/44.jpg",
     quote:
-      "The receipt scanning feature saves me hours each month. Now I can focus on my work instead of manual data entry and expense tracking.",
+      "Scanning bills directly from site saves so much time. No more lost receipts or missing expenses at month end.",
   },
   {
-    name: "Emily Rodriguez",
-    role: "Financial Advisor",
-    image: "https://randomuser.me/api/portraits/women/74.jpg",
+    name: "Daniel Wright",
+    role: "Civil Engineer",
+    image: "https://randomuser.me/api/portraits/men/56.jpg",
     quote:
-      "I recommend Welth to all my clients. The automated tracking and detailed analytics make it perfect for modern money management.",
+      "Now we can clearly see which projects are profitable and where costs are leaking. It feels like having a financial brain for the company.",
   },
 ];

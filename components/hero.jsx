@@ -33,22 +33,19 @@ const HeroSection = () => {
     <div className="pb-20 px-4">
       <div className="container mx-auto text-center">
         <h1 className="text-5xl md:text-8xl lg:text-[105px] pb-6 gradient-title">
-          Elevate Your Finances <br /> with Intelligence
+          Elevate Every Project <br /> with Intelligence
         </h1>
+
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          An AI-powered personal finance engine that helps you track,
-          analyze, and optimize your spending with real-time insights.
+          An AI-powered finance system for builders, helping you track costs,
+          plan smarter, and deliver every home with confidence.
         </p>
 
         <div className="flex justify-center space-x-4">
-          {/* ✅ Correct: Button asChild with Link */}
           <Button asChild size="lg" className="px-8">
-            <Link href="/dashboard">
-              Get Started
-            </Link>
+            <Link href="/dashboard">Get Started</Link>
           </Button>
 
-          {/* ✅ Correct: single Button with onClick */}
           <Button
             size="lg"
             variant="outline"

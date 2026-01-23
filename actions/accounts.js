@@ -1,4 +1,5 @@
 "use server";
+
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
@@ -130,6 +131,59 @@ export async function updateDefaultAccount(accountId) {
     revalidatePath("/dashboard");
     return { success: true, data: serializeDecimal(account) };
   } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteAccount(accountId) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+    if (!user) throw new Error("User not found");
+
+    await db.account.delete({
+      where: {
+        id: accountId,
+        userId: user.id,
+      },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/account/[id]");
+    return { success: true };
+  } catch (error) {
+    console.error("Delete account error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function renameAccount({ id, name }) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+    if (!user) throw new Error("User not found");
+
+    const account = await db.account.update({
+      where: {
+        id,
+        userId: user.id,
+      },
+      data: { name },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/account/[id]");
+    return { success: true, data: serializeDecimal(account) };
+  } catch (error) {
+    console.error("Rename account error:", error);
     return { success: false, error: error.message };
   }
 }

@@ -360,8 +360,9 @@ export function TransactionTable({ transactions }) {
                       t.type === "EXPENSE" ? "text-red-500" : "text-green-500"
                     )}
                   >
-                    {t.type === "EXPENSE" ? "-" : "+"}${t.amount.toFixed(2)}
+                    {t.type === "EXPENSE" ? "-" : "+"}₹{t.amount.toFixed(2)}
                   </TableCell>
+
                   <TableCell>
                     {t.isRecurring ? (
                       <Badge className="gap-1 bg-purple-100 text-purple-700">

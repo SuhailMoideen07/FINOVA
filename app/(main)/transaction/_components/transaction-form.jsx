@@ -32,13 +32,13 @@ import { transactionSchema } from "@/app/lib/schema";
 import ReceiptScanner from "./receipt-scanner";
 
 const AddTransactionForm = ({
-   accounts, 
-   categories,
-   editMode=false,
-    initialData=null,
+  accounts,
+  categories,
+  editMode = false,
+  initialData = null,
 }) => {
   const router = useRouter();
-  const searchParams =  useSearchParams();
+  const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
 
   const {
@@ -51,28 +51,28 @@ const AddTransactionForm = ({
     reset,
   } = useForm({
     resolver: zodResolver(transactionSchema),
-    defaultValues: 
-    editMode && initialData
-     ? {
-        type: initialData.type,
-        amount: initialData.amount.toString(),
-        description: initialData.description,
-        accountId: initialData.accountId,
-        category: initialData.category,
-        date: new Date(initialData.date),
-        isRecurring: initialData.isRecurring,
-       ...(initialData.recurringInterval&& { 
-        recurringInterval: initialData.recurringInterval,
-       }),
-     }
-    : {
-      type: "EXPENSE",
-      amount: "",
-      description: "",
-      accountId: accounts?.find((ac) => ac.isDefault)?.id,
-      date: new Date(),
-      isRecurring: false,
-    },
+    defaultValues:
+      editMode && initialData
+        ? {
+          type: initialData.type,
+          amount: initialData.amount.toString(),
+          description: initialData.description,
+          accountId: initialData.accountId,
+          category: initialData.category,
+          date: new Date(initialData.date),
+          isRecurring: initialData.isRecurring,
+          ...(initialData.recurringInterval && {
+            recurringInterval: initialData.recurringInterval,
+          }),
+        }
+        : {
+          type: "EXPENSE",
+          amount: "",
+          description: "",
+          accountId: accounts?.find((ac) => ac.isDefault)?.id,
+          date: new Date(),
+          isRecurring: false,
+        },
   });
 
   const {
@@ -82,23 +82,23 @@ const AddTransactionForm = ({
   } = useFetch(editMode ? updateTransaction : createTransactions);
 
   const onSubmit = async (data) => {
-  const formData = {
-    ...data,
-    amount: parseFloat(data.amount),
-  };
+    const formData = {
+      ...data,
+      amount: parseFloat(data.amount),
+    };
 
-  if (editMode) {
-    transactionFn(editId, formData);
-  } else {
-    transactionFn(formData);
-  }
-};
+    if (editMode) {
+      transactionFn(editId, formData);
+    } else {
+      transactionFn(formData);
+    }
+  };
 
 
   useEffect(() => {
     if (transactionResult?.success && !transactionLoading) {
-      toast.success(editMode 
-        ? "Transaction updated successfully" 
+      toast.success(editMode
+        ? "Transaction updated successfully"
         : "Transaction created successfully"
       );
       reset();
@@ -124,16 +124,17 @@ const AddTransactionForm = ({
     if (scannedData) {
       setValue("amount", scannedData.amount.toString());
       setValue("date", new Date(scannedData.date));
-      
+
       if (scannedData.description) {
         setValue("description", scannedData.description);
       }
-      
+
       if (scannedData.category) {
         // Search in ALL categories first
         const matchedCategory = categories?.find(
-          (cat) => cat.name.toLowerCase() === scannedData.category.toLowerCase()
+          (cat) => cat.id === scannedData.category
         );
+
 
         if (matchedCategory) {
           // If the category type doesn't match current transaction type, update the type first
@@ -146,7 +147,7 @@ const AddTransactionForm = ({
           toast.error(`Category "${scannedData.category}" not found`);
         }
       }
-      
+
       toast.success("Receipt scanned successfully");
     }
   };
@@ -199,7 +200,7 @@ const AddTransactionForm = ({
             <SelectContent>
               {accounts?.map((account) => (
                 <SelectItem key={account.id} value={account.id}>
-                  {account.name} (${parseFloat(account.balance).toFixed(2)})
+                  {account.name} (₹{parseFloat(account.balance).toFixed(2)})
                 </SelectItem>
               ))}
               <div className="border-t mt-1 pt-1">
@@ -342,11 +343,11 @@ const AddTransactionForm = ({
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               {editMode ? "Updating..." : "Creating..."}
             </>
-          ) : editMode ? ( 
-              "Update Transaction" 
-            ) : (
-              "Create Transaction"
-            )}
+          ) : editMode ? (
+            "Update Transaction"
+          ) : (
+            "Create Transaction"
+          )}
         </Button>
       </div>
     </form>

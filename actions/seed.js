@@ -3,68 +3,73 @@
 import { db } from "@/lib/prisma";
 import { subDays } from "date-fns";
 
-const ACCOUNT_ID = "cf038a8e-7754-4e89-a616-17894cf22eae";
+const ACCOUNT_ID = "fe788f77-a629-4bb4-b0ea-9d56bd762715";
 const USER_ID = "6f91417a-2ed9-485f-b399-cd7d60d3c69f";
 
-// Categories with their typical amount ranges
+// Project-focused GLES categories (only from your category.js)
 const CATEGORIES = {
   INCOME: [
-    { name: "salary", range: [5000, 8000] },
-    { name: "freelance", range: [1000, 3000] },
-    { name: "investments", range: [500, 2000] },
-    { name: "other-income", range: [100, 1000] },
+    { name: "project-payment", range: [120000, 450000], desc: "House construction project payment" },
+    { name: "advance-receipt", range: [40000, 220000], desc: "Advance for new house project" },
+    { name: "consultation-fee", range: [5000, 30000], desc: "House plan & design consultation" },
+    { name: "maintenance-contract", range: [10000, 70000], desc: "Annual maintenance contract" },
+    { name: "other-income", range: [3000, 25000], desc: "Miscellaneous company income" },
   ],
+
   EXPENSE: [
-    { name: "housing", range: [1000, 2000] },
-    { name: "transportation", range: [100, 500] },
-    { name: "groceries", range: [200, 600] },
-    { name: "utilities", range: [100, 300] },
-    { name: "entertainment", range: [50, 200] },
-    { name: "food", range: [50, 150] },
-    { name: "shopping", range: [100, 500] },
-    { name: "healthcare", range: [100, 1000] },
-    { name: "education", range: [200, 1000] },
-    { name: "travel", range: [500, 2000] },
+    { name: "building-materials", range: [20000, 180000], desc: "Cement, sand & bricks purchase" },
+    { name: "steel-iron", range: [18000, 160000], desc: "Steel rods & structural iron" },
+    { name: "labour-wages", range: [12000, 65000], desc: "Daily labour & contract wages" },
+    { name: "machinery-rent", range: [6000, 40000], desc: "JCB, mixer & equipment rent" },
+    { name: "transport-logistics", range: [3000, 28000], desc: "Material transport & fuel" },
+    { name: "site-utilities", range: [1500, 10000], desc: "Site electricity & water" },
+    { name: "tools-equipment", range: [4000, 35000], desc: "Construction tools & safety gear" },
+    { name: "travel-site", range: [1200, 14000], desc: "Engineer site visit travel" },
+    { name: "permits-fees", range: [5000, 32000], desc: "Panchayat & building permits" },
+    { name: "health-safety", range: [2000, 18000], desc: "Insurance & safety equipment" },
+    { name: "other-expense", range: [1000, 12000], desc: "Miscellaneous site expense" },
   ],
 };
 
-// Helper to generate random amount within a range
 function getRandomAmount(min, max) {
-  return Number((Math.random() * (max - min) + min).toFixed(2));
+  return Math.round(Math.random() * (max - min) + min);
 }
 
-// Helper to get random category with amount
-function getRandomCategory(type) {
-  const categories = CATEGORIES[type];
-  const category = categories[Math.floor(Math.random() * categories.length)];
-  const amount = getRandomAmount(category.range[0], category.range[1]);
-  return { category: category.name, amount };
+function pick(type) {
+  const list = CATEGORIES[type];
+  const item = list[Math.floor(Math.random() * list.length)];
+  return {
+    category: item.name,
+    amount: getRandomAmount(item.range[0], item.range[1]),
+    desc: item.desc,
+  };
 }
 
 export async function seedTransactions() {
   try {
-    // Generate 90 days of transactions
     const transactions = [];
     let totalBalance = 0;
 
-    for (let i = 90; i >= 0; i--) {
+    // 120 days (~4 months)
+    for (let i = 120; i >= 0; i--) {
       const date = subDays(new Date(), i);
 
-      // Generate 1-3 transactions per day
-      const transactionsPerDay = Math.floor(Math.random() * 3) + 1;
+      // 1–4 entries per day
+      const count = Math.floor(Math.random() * 4) + 1;
 
-      for (let j = 0; j < transactionsPerDay; j++) {
-        // 40% chance of income, 60% chance of expense
-        const type = Math.random() < 0.4 ? "INCOME" : "EXPENSE";
-        const { category, amount } = getRandomCategory(type);
+      for (let j = 0; j < count; j++) {
+        // More expenses day-to-day, but incomes are larger
+        const type = Math.random() < 0.38 ? "INCOME" : "EXPENSE";
+        const { category, amount, desc } = pick(type);
 
         const transaction = {
           id: crypto.randomUUID(),
           type,
           amount,
-          description: `${
-            type === "INCOME" ? "Received" : "Paid for"
-          } ${category}`,
+          description:
+            type === "INCOME"
+              ? `Received – ${desc}`
+              : `Paid for ${desc}`,
           date,
           category,
           status: "COMPLETED",
@@ -79,19 +84,37 @@ export async function seedTransactions() {
       }
     }
 
-    // Insert transactions in batches and update account balance
+    // Safety net: if somehow negative, inject a final project payment
+    if (totalBalance < 0) {
+      const fixAmount = Math.abs(totalBalance) + getRandomAmount(50000, 150000);
+      const date = new Date();
+
+      transactions.push({
+        id: crypto.randomUUID(),
+        type: "INCOME",
+        amount: fixAmount,
+        description: "Received – Final project settlement",
+        date,
+        category: "project-payment",
+        status: "COMPLETED",
+        userId: USER_ID,
+        accountId: ACCOUNT_ID,
+        createdAt: date,
+        updatedAt: date,
+      });
+
+      totalBalance += fixAmount;
+    }
+
     await db.$transaction(async (tx) => {
-      // Clear existing transactions
       await tx.transaction.deleteMany({
         where: { accountId: ACCOUNT_ID },
       });
 
-      // Insert new transactions
       await tx.transaction.createMany({
         data: transactions,
       });
 
-      // Update account balance
       await tx.account.update({
         where: { id: ACCOUNT_ID },
         data: { balance: totalBalance },
@@ -100,10 +123,10 @@ export async function seedTransactions() {
 
     return {
       success: true,
-      message: `Created ${transactions.length} transactions`,
+      message: `Seeded ${transactions.length} project transactions (final balance ₹${totalBalance})`,
     };
   } catch (error) {
-    console.error("Error seeding transactions:", error);
+    console.error("Error seeding project transactions:", error);
     return { success: false, error: error.message };
   }
 }

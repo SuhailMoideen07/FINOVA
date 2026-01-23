@@ -1,162 +1,148 @@
 export const defaultCategories = [
-  // Income Categories
+  // Income Categories (Company-Oriented)
   {
-    id: "salary",
-    name: "Salary",
+    id: "project-payment",
+    name: "Project Payment",
     type: "INCOME",
-    color: "#22c55e", // green-500
+    color: "#22c55e", // green-500 (Salary)
+    icon: "Building2",
+  },
+  {
+    id: "advance-receipt",
+    name: "Advance Receipt",
+    type: "INCOME",
+    color: "#06b6d4", // cyan-500 (Freelance)
     icon: "Wallet",
   },
   {
-    id: "freelance",
-    name: "Freelance",
+    id: "consultation-fee",
+    name: "Consultation Fee",
     type: "INCOME",
-    color: "#06b6d4", // cyan-500
-    icon: "Laptop",
+    color: "#6366f1", // indigo-500 (Investments)
+    icon: "ClipboardList",
   },
   {
-    id: "investments",
-    name: "Investments",
+    id: "maintenance-contract",
+    name: "Maintenance Contract",
     type: "INCOME",
-    color: "#6366f1", // indigo-500
-    icon: "TrendingUp",
+    color: "#ec4899", // pink-500 (Business)
+    icon: "Wrench",
   },
   {
-    id: "business",
-    name: "Business",
+    id: "rental-income",
+    name: "Rental Income",
     type: "INCOME",
-    color: "#ec4899", // pink-500
-    icon: "Building",
-  },
-  {
-    id: "rental",
-    name: "Rental",
-    type: "INCOME",
-    color: "#f59e0b", // amber-500
+    color: "#f59e0b", // amber-500 (Rental)
     icon: "Home",
   },
   {
     id: "other-income",
     name: "Other Income",
     type: "INCOME",
-    color: "#64748b", // slate-500
+    color: "#64748b", // slate-500 (Other Income)
     icon: "Plus",
   },
 
-  // Expense Categories
+  // Expense Categories (Construction Focused)
   {
-    id: "housing",
-    name: "Housing",
+    id: "building-materials",
+    name: "Building Materials",
     type: "EXPENSE",
-    color: "#ef4444", // red-500
-    icon: "Home",
-    subcategories: ["Rent", "Mortgage", "Property Tax", "Maintenance"],
+    color: "#ef4444", // red-500 (Housing)
+    icon: "Boxes",
+    subcategories: ["Cement", "Sand", "Bricks", "Aggregates"],
   },
   {
-    id: "transportation",
-    name: "Transportation",
+    id: "steel-iron",
+    name: "Steel & Iron",
     type: "EXPENSE",
-    color: "#f97316", // orange-500
-    icon: "Car",
-    subcategories: ["Fuel", "Public Transport", "Maintenance", "Parking"],
+    color: "#f97316", // orange-500 (Transportation)
+    icon: "Hammer",
+    subcategories: ["TMT Bars", "Frames", "Wire"],
   },
   {
-    id: "groceries",
-    name: "Groceries",
+    id: "labour-wages",
+    name: "Labour Wages",
     type: "EXPENSE",
-    color: "#84cc16", // lime-500
-    icon: "Shopping",
+    color: "#84cc16", // lime-500 (Groceries)
+    icon: "Users",
   },
   {
-    id: "utilities",
-    name: "Utilities",
+    id: "machinery-rent",
+    name: "Machinery Rent",
     type: "EXPENSE",
-    color: "#06b6d4", // cyan-500
+    color: "#06b6d4", // cyan-500 (Utilities)
+    icon: "Truck",
+    subcategories: ["JCB", "Mixer", "Scaffolding"],
+  },
+  {
+    id: "transport-logistics",
+    name: "Transport & Logistics",
+    type: "EXPENSE",
+    color: "#8b5cf6", // violet-500 (Entertainment)
+    icon: "Truck",
+    subcategories: ["Lorry", "Fuel", "Delivery"],
+  },
+  {
+    id: "site-utilities",
+    name: "Site Utilities",
+    type: "EXPENSE",
+    color: "#f43f5e", // rose-500 (Food)
     icon: "Zap",
-    subcategories: ["Electricity", "Water", "Gas", "Internet", "Phone"],
+    subcategories: ["Electricity", "Water"],
   },
   {
-    id: "entertainment",
-    name: "Entertainment",
+    id: "tools-equipment",
+    name: "Tools & Equipment",
     type: "EXPENSE",
-    color: "#8b5cf6", // violet-500
-    icon: "Film",
-    subcategories: ["Movies", "Games", "Streaming Services"],
+    color: "#ec4899", // pink-500 (Shopping)
+    icon: "Tool",
+    subcategories: ["Drills", "Safety Gear", "Measuring Tools"],
   },
   {
-    id: "food",
-    name: "Food",
+    id: "office-expense",
+    name: "Office Expenses",
     type: "EXPENSE",
-    color: "#f43f5e", // rose-500
-    icon: "UtensilsCrossed",
+    color: "#14b8a6", // teal-500 (Healthcare)
+    icon: "Briefcase",
+    subcategories: ["Stationery", "Rent", "Internet"],
   },
   {
-    id: "shopping",
-    name: "Shopping",
+    id: "marketing",
+    name: "Marketing & Promotion",
     type: "EXPENSE",
-    color: "#ec4899", // pink-500
-    icon: "ShoppingBag",
-    subcategories: ["Clothing", "Electronics", "Home Goods"],
+    color: "#6366f1", // indigo-500 (Education)
+    icon: "Megaphone",
+    subcategories: ["Ads", "Banners", "Brochures"],
   },
   {
-    id: "healthcare",
-    name: "Healthcare",
+    id: "travel-site",
+    name: "Site Travel",
     type: "EXPENSE",
-    color: "#14b8a6", // teal-500
-    icon: "HeartPulse",
-    subcategories: ["Medical", "Dental", "Pharmacy", "Insurance"],
+    color: "#0ea5e9", // sky-500 (Travel)
+    icon: "Car",
   },
   {
-    id: "education",
-    name: "Education",
+    id: "permits-fees",
+    name: "Permits & Fees",
     type: "EXPENSE",
-    color: "#6366f1", // indigo-500
-    icon: "GraduationCap",
-    subcategories: ["Tuition", "Books", "Courses"],
+    color: "#64748b", // slate-500 (Insurance)
+    icon: "FileText",
+    subcategories: ["Panchayat", "Building Permit", "Tax"],
   },
   {
-    id: "personal",
-    name: "Personal Care",
+    id: "health-safety",
+    name: "Health & Safety",
     type: "EXPENSE",
-    color: "#d946ef", // fuchsia-500
-    icon: "Smile",
-    subcategories: ["Haircut", "Gym", "Beauty"],
-  },
-  {
-    id: "travel",
-    name: "Travel",
-    type: "EXPENSE",
-    color: "#0ea5e9", // sky-500
-    icon: "Plane",
-  },
-  {
-    id: "insurance",
-    name: "Insurance",
-    type: "EXPENSE",
-    color: "#64748b", // slate-500
-    icon: "Shield",
-    subcategories: ["Life", "Home", "Vehicle"],
-  },
-  {
-    id: "gifts",
-    name: "Gifts & Donations",
-    type: "EXPENSE",
-    color: "#f472b6", // pink-400
-    icon: "Gift",
-  },
-  {
-    id: "bills",
-    name: "Bills & Fees",
-    type: "EXPENSE",
-    color: "#fb7185", // rose-400
-    icon: "Receipt",
-    subcategories: ["Bank Fees", "Late Fees", "Service Charges"],
+    color: "#f472b6", // pink-400 (Gifts)
+    icon: "ShieldCheck",
+    subcategories: ["Insurance", "Medical", "Safety Kits"],
   },
   {
     id: "other-expense",
     name: "Other Expenses",
     type: "EXPENSE",
-    color: "#94a3b8", // slate-400
+    color: "#94a3b8", // slate-400 (Other Expense)
     icon: "MoreHorizontal",
   },
 ];
