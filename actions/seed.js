@@ -3,8 +3,8 @@
 import { db } from "@/lib/prisma";
 import { subDays } from "date-fns";
 
-const ACCOUNT_ID = "fe788f77-a629-4bb4-b0ea-9d56bd762715";
-const USER_ID = "6f91417a-2ed9-485f-b399-cd7d60d3c69f";
+const ACCOUNT_ID = "6c0b39c4-907c-4002-aaca-d183c799dfb3";
+const USER_ID = "bd43262b-1dff-4265-9684-8926ae852c7b";
 
 // Project-focused GLES categories (only from your category.js)
 const CATEGORIES = {
