@@ -170,7 +170,7 @@ const AccountCard = ({ account }) => {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-6 w-6 flex-shrink-0"
+                  className="h-6 w-6 shrink-0"
                   onClick={confirmRename}
                 >
                   <Check className="h-4 w-4 text-green-500" />
@@ -178,7 +178,7 @@ const AccountCard = ({ account }) => {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-6 w-6 flex-shrink-0"
+                  className="h-6 w-6 shrink-0"
                   onClick={cancelRename}
                 >
                   <X className="h-4 w-4 text-red-500" />
@@ -195,7 +195,7 @@ const AccountCard = ({ account }) => {
           </div>
 
           <div
-            className="flex items-center gap-2 flex-shrink-0"
+            className="flex items-center gap-2 shrink-0"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

@@ -3,8 +3,8 @@
 import { db } from "@/lib/prisma";
 import { subDays } from "date-fns";
 
-const ACCOUNT_ID = "f29d6055-04f2-41d4-9950-099bc50d839e";
-const USER_ID = "bd43262b-1dff-4265-9684-8926ae852c7b";
+const ACCOUNT_ID = "aaa0f333-7de9-40b8-97a4-bdb989d44d95";
+const USER_ID = "6f91417a-2ed9-485f-b399-cd7d60d3c69f";
 
 // Office-focused categories (only from your category.js)
 const CATEGORIES = {
