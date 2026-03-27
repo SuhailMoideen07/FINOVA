@@ -6,7 +6,7 @@ import {
   Zap,
   Repeat,
   Building2,
-  Truck,
+  Brain,
 } from "lucide-react";
 
 // Stats Data (Company-focused)
@@ -50,10 +50,10 @@ export const featuresData = [
       "Maintain separate financial views for each site, client, or project.",
   },
   {
-    icon: <Truck className="h-8 w-8 text-blue-600" />,
-    title: "Material & Labour Tracking",
+    icon: <Brain className="h-8 w-8 text-blue-600" />,
+    title: "AI-Powered Financial Assistant",
     description:
-      "Monitor spending on cement, steel, labour wages, and machinery with ease.",
+      "Interact with your finances using natural language and get instant analytical insights.",
   },
   {
     icon: <Repeat className="h-8 w-8 text-blue-600" />,
