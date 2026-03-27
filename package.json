@@ -52,6 +52,7 @@
   "devDependencies": {
     "@react-email/preview-server": "5.2.1",
     "@tailwindcss/postcss": "^4",
+    "baseline-browser-mapping": "^2.10.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.5",
     "prisma": "^7.1.0",
